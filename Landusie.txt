@@ -1,0 +1,371 @@
+!--------------------------------------------------
+!- Monday, 13 September 2021 12:09:51
+!- T64 import header information for: 
+!- c:\data\downloads\geheimvl_28276_01\geheimvl.t64
+!- Title       : ASS PRESENTS:          
+!- Description : C64 tape image file
+!- Version     : 256 ($0100)
+!- Num Files   : 2
+!- Max Files   : 2
+!--------------------------------------------------
+!--------------------------------------------------
+!- T64 import record information
+!- File name     : HET GEHEIM DOX 
+!- Start Address : 2049 ($0801)
+!- End Address   : 8788 ($2254)
+!--------------------------------------------------
+10 REM ***************************
+20 REM * HET GEHEIM VAN LANDUSIE *
+30 REM ***************************
+40 GOSUB 8000: REM INITIATIE
+50 GOSUB 2500: REM KIJK
+60 GOSUB 1000: REM COMMANDO VERTELLER
+70 GOSUB 2000: REM ACTIES
+80 GOSUB 5000: REM TEGEN ACTIES
+90 IF RE>0 THEN GOTO 60
+100 PRINT: PRINT "u bent helaas aan uw verwondingen"
+110 PRINT "overleden."
+120 PRINT "typ 'run' voor nog een poging."
+130 END
+1000 REM *********************
+1010 REM * COMMANDO VERTALER *
+1020 REM *********************
+1030 PRINT: INPUT "wat doet u"; C$
+1040 POKE 646,14: LC=LEN (C$): PO=LC+1
+1050 IF LC=0 THEN GOTO 1030
+1060 IF C$="*" THEN RETURN: REM HERHAAL VORIGE OPDRACHT
+1070 REM BEPAAL PLAATS SPATIE
+1080 FOR I=1 TO LC
+1090 IF MID$(C$,I,1)= " " THEN PO=I
+1100 NEXT I
+1110 REM HERKENNING VAN WOORDEN
+1120 C1=0: C2=0
+1130 W$= MID$ (C$,1,PO-1)
+1140 LE= LEN (W$)
+1150 FOR I=1 TO NC
+1160 IF W$= MID$(T$(I),1,LE) THEN C1=I: I=NC
+1170 NEXT I
+1180 IF C1=0 THEN PRINT: PRINT "ik snap niet wat u bedoelt.": GOTO 1030
+1190 IF PO=LC+1 THEN RETURN
+1200 W$= MID$(C$,PO+1,LC)
+1210 LE = LEN (W$)
+1220 FOR I=(NC+1) TO NT
+1230 IF W$=MID$(T$(I),1,LE) THEN C2=I: I=NT
+1240 NEXT I
+1250 RETURN
+2000 REM **********
+2010 REM * ACTIES *
+2020 REM **********
+2030 ON CM% (C1) GOSUB 2100, 2200, 2300, 2400, 2500, 2700, 3000, 2900
+2040 RETURN
+2100 REM * POSITIE VERANDERING *
+2110 IF K% (KA,C1) = 0 THEN PRINT "daar kunt u niet heen.": RETURN
+2120 KA=K% (KA,C1)
+2130 GOSUB 2500: REM KIJK
+2140 RETURN
+2200 REM * PAK *
+2210 OB=C2-NC
+2220 IF OB<=0 OR NO<OB THEN PRINT "dat kunt u niet pakken.": RETURN
+2230 IF KA<>OB% (OB,1) THEN PRINT "dat voorwerp ligt hier niet.": RETURN
+2240 IF RL-OB% (OB,2)<0 THEN PRINT "zoveel kunt u niet meer dragen.": RETURN
+2250 OB% (OB,1)=0: REM PLAATS 0 IS DE SPELER
+2260 PRINT: PRINT "u pakt het voorwerp."
+2270 RL=RL-OB% (OB,2)
+2280 RETURN
+2300 REM * LEG *
+2310 OB= C2-NC
+2320 IF OB<=0 OR NO<OB THEN PRINT "dat gaat niet.": RETURN
+2330 IF OB% (OB,1)<> 0 THEN PRINT "dat heeft u niet.": RETURN
+2340 RL=RL+OB% (OB,2)
+2350 OB% (OB,1)=KA
+2360 PRINT "nu ligt het voorwerp op de grond."
+2370 RETURN
+2400 REM * INVENTARIS *
+2410 D=0: PRINT: PRINT "u heeft";
+2420 FOR I=1 TO NO
+2430 IF OB%(I,1)=0 THEN PRINT " een "; T$(NC+I): D=1
+2440 NEXT I
+2450 IF D=0 THEN PRINT " niets."
+2460 PRINT: PRINT "u kunt nog"; RE;:PRINT "wonden overleven."
+2470 PRINT: PRINT "u kunt nog een gewicht van";RL
+2480 PRINT "eenheden dragen."
+2490 RETURN
+2500 REM * KIJK *
+2510 PRINT CHR$(147):PRINT
+2520 IF KA<= 7 THEN ON KA    GOSUB 4030,4040,4060,4070,4090,4110,4130:GOTO 2560
+2530 IF KA<= 14 THEN ON KA-7 GOSUB 4150,4160,4180,4190,4210,4220,4240:GOTO 2560
+2540 IF KA<=21 THEN ON KA-14 GOSUB 4290,4340,4360,4380,4400,4420,4450:GOTO 2560
+2550 IF KA<=28 THEN ON KA-21 GOSUB 4470,4480,4500,4560,4580,4600,4610:GOTO 2560
+2560 PRINT:PRINT "uitgangen:":PRINT
+2570 FOR I=1 TO 6
+2580 IF K% (KA,I)<>0 THEN PRINT "{space*4}"; T$(I)
+2590 NEXT I
+2600 D=0: PRINT: PRINT "hier ligt ";
+2610 FOR I=1 TO NO
+2620 IF KA=OB% (I,1) THEN PRINT "een ";T$(NC+I):D=1
+2630 NEXT I
+2640 IF D=0 THEN PRINT "geen voorwerp."
+2650 RETURN
+2700 REM * VECHT/DOOD *
+2710 SU=C2-NC-NO
+2720 IF SU<=0 THEN PRINT "daar valt niet tegen te vechten.":RETURN
+2730 IF KA<>SU% (SU,1) THEN PRINT "uw tegenstander is niet aanwezig.":RETURN
+2740 IF SU% (SU,2)<=0 THEN PRINT "durft u wel?":RETURN
+2750 HC=1
+2760 IF OB% (2,1)=0 THEN HC=2: REM ZWAARD GEEFT EXTRA VECHTKRACHT
+2770 PRINT:PRINT "u valt ";:IF HC=2 THEN PRINT "met uw zwaard ";
+2780 PRINT "uw tegenstander aan."
+2790 IF RND(1)>0.4 THEN GOTO 2810
+2800 PRINT "in uw geestdrift mist u uw tegenstander volkomen.":RETURN
+2810 PRINT "u brengt uw tegenstander een daverende slag toe."
+2820 SU% (SU,2)=SU% (SU,2)-HC
+2830 IF SU% (SU,2)=1 THEN PRINT "uw tegenstander is zwaar gewond."
+2840 IF SU% (SU,2)<=0 THEN PRINT "uw tegenstander is overleden."
+2850 RETURN
+2900 REM * WACHT *
+2910 PRINT: PRINT "u wacht een tijdje."
+2920 RETURN
+3000 REM * GEBRUIK *
+3010 OB=C2-NC
+3020 IF OB>NO OR OB<1 THEN PRINT "dat is niet te gebruiken.":RETURN
+3030 IF OB% (OB,1)<>0 THEN PRINT "dat heeft u niet!":RETURN
+3040 ON OB GOTO 3100, 3200, 3300, 3400
+3100 REM * VERBAND *
+3110 OB% (OB,1)=100: RL=RL+OB% (OB,2):REM VERBRUIKT
+3120 IF KA<>SU% (4,1) OR SU% (4,2)<=0 THEN 3140
+3130 PRINT "met het verband verbindt u de smid.":SU% (4,2)=2:RETURN
+3140 IF RE=6 THEN PRINT "u eet het verband op.":RETURN
+3150 PRINT "u gebruikt het om uw wonden te verbindenen knapt er aardig van op."
+3160 RE=6
+3170 RETURN
+3200 REM * ZWAARD *
+3210 PRINT "u probeert met uw zwaard uw nagels bij"
+3220 PRINT "te werken, hetgeen nogal onhandig gaat.":RETURN
+3300 REM * FLUIT *
+3310 IF KA>20 THEN GOTO 3330
+3320 PRINT "u fluit een aardig deuntje weg, hoewel{space*2}niet geheel zuiver.":RETURN
+3330 PRINT "reeds na het inzetten van de eerste"
+3340 PRINT "toon wordt het u zwart voor de ogen"
+3350 PRINT:PRINT "na een paar uur wordt u uitgestrekt op"
+3360 PRINT "de grond weer wakker."
+3370 KA=49-KA: REM SPIEGEL POSITIE
+3380 GOSUB 2500: REM KIJK
+3390 RETURN
+3400 REM * TOUW *
+3410 IF KA=14 THEN GOTO 3430
+3420 PRINT "na 1 minuut touwtje springen gaat uweer verder.":RETURN
+3430 PRINT "u gooit het touw omhoog, en het blijft"
+3440 PRINT "in een tak -vlakbij de muur- vastzitten."
+3450 K% (14,5)=15: K% (15,6)=14: OB% (OB,1)=100:RL=RL+OB% (OB,2)
+3460 RETURN
+4000 REM ************************
+4010 REM * KAMER BESCHRIJVINGEN *
+4020 REM ************************
+4030 PRINT "u bent in een groot donker bos.": RETURN
+4040 PRINT "u bent in een afgelegen deel van het"
+4050 PRINT "uitgestrekte bos.":RETURN
+4060 PRINT "u bent in een groot donker bos.": RETURN
+4070 PRINT "u bent op een open plek midden in het"
+4080 PRINT "bos.":RETURN
+4090 PRINT "u bent op een open plek in het grote"
+4100 PRINT "bos.":RETURN
+4110 PRINT "u bevindt zich aan de oostrand van het"
+4120 PRINT "grote uitgestrekte bos.":RETURN
+4130 PRINT "u staat in het bos."
+4140 PRINT "in het zuiden ziet u een oude vervallen hut.":RETURN
+4150 PRINT "u bent in het grote donkere bos.":RETURN
+4160 PRINT "u bent aan de oostrand van het grote"
+4170 PRINT "bos.":RETURN
+4180 PRINT "u bent in de oude hut van de smid.":RETURN
+4190 PRINT "u bevindt zich in de werkplaats van de"
+4200 PRINT" smid.":RETURN
+4210 PRINT "u loopt op een grote groene weide.":RETURN
+4220 PRINT "u bent op de grote groene weide vlak"
+4230 PRINT "voor het kasteel.":RETURN
+4240 PRINT "u bent nu bij de kasteelmuur. hier is"
+4250 PRINT "een boom, met takken tot over de"
+4260 PRINT "kantelen. ";
+4270 IF OB% (4,1)=100 THEN PRINT "in de boom hangt een touw.";
+4280 PRINT:RETURN
+4290 PRINT "u staat op de kantelen van de oude"
+4300 PRINT "kasteelmuur. ";
+4310 IF OB% (4,1)<>100 THEN PRINT:RETURN
+4320 PRINT "in de takken van de boom"
+4330 PRINT "hangt een touw.":RETURN
+4340 PRINT "u bevindt zich op de kantelen vlakbij"
+4350 PRINT "een trap.":RETURN
+4360 PRINT "u bent op de binnenplaats van het"
+4370 PRINT "kasteel.":RETURN
+4380 PRINT "u bent op de binnenplaats vlakbij de"
+4390 PRINT "ingang.":RETURN
+4400 PRINT "u bent in het woongedeelte van het"
+4410 PRINT "kasteel.":RETURN
+4420 PRINT "u staat voor de ingang van de tempel."
+4430 PRINT "op de wand is een grote afbeelding van"
+4440 PRINT "een fluit.":RETURN
+4450 PRINT "u bent in een kamer, met op elke wand"
+4460 PRINT "een 1.":RETURN
+4470 PRINT "u bevindt zich in een kamer met op elke wand het cijfer 2.":RETURN
+4480 PRINT "elke wand in deze kamer heeft het"
+4490 PRINT "cijfer 3.":RETURN
+4500 PRINT "u bent in de schatkamer."
+4510 IF C1*C2=192 THEN PRINT "het is u gelukt, gefeliciteerd!":END
+4520 PRINT "u wordt door een onzichtbare kracht de"
+4530 RE=RE-1: KA=20
+4540 PRINT "kamer uitgeworpen. met een enorme smak"
+4550 PRINT "komt u weer op de grond terecht.":RETURN
+4560 PRINT "op de achterwand van deze kamer ziet u"
+4570 PRINT "een 4.":RETURN
+4580 PRINT "u bent in een kamer met het cijfer 6 op"
+4590 PRINT "elke wand.":RETURN
+4600 PRINT "elke wand in deze kamer heeft het cijfer7.":RETURN
+4610 PRINT "u bent in een kamer met het cijfer 8 op"
+4620 PRINT "elke wand.":RETURN
+5000 REM ****************
+5010 REM * TEGEN ACTIES *
+5020 REM ****************
+5030 NEP = RND(1):PRINT
+5040 IF KA=SU% (1,1) THEN GOSUB 5100: REM TOVENAAR
+5050 IF KA<10 THEN GOSUB 5200: REM VOGELS
+5060 IF KA=17 OR KA=18 THEN 5400: REM DRAAK
+5070 IF KA=SU% (4,1) OR SU% (4,3)>10 THEN GOSUB 5600: REM SMID
+5080 RETURN
+5100 REM * TOVENAAR *
+5110 PRINT"een oude man komt uit een donkere hoek, en kijkt u vriendelijk aan."
+5120 PRINT"hij zucht: dat ik dit nog mag meemaken, ik ben u eeuwig dankbaar."
+5130 PRINT "laat mij als tegenprestatie u deze"
+5140 PRINT "transportfluit aanbieden. vervolgens"
+5150 PRINT "drukt hij u een vreemde fluit in handen"
+5160 PRINT "en verdwijnt naar buiten."
+5170 SU%(1,1)= 100: OB%(3,1)=0: RL=RL-OB%(3,2)
+5180 RETURN
+5200 REM * VOGELS *
+5210 SU% (2,3)=SU% (2,3)-1
+5220 IF SU% (2,3)>0 THEN RETURN
+5230 SU%(2,3)=1+INT(RND(1)*5)
+5240 PRINT "plotseling hoort u een angstaanjagend"
+5250 PRINT "geluid. ";
+5260 IF RND (1)<0.5 THEN GOTO 5290
+5270 PRINT "een grote vogel vliegt"
+5280 PRINT "rakelings langs uw hoofd.":RETURN
+5290 PRINT "u wordt door een grote vogel"
+5300 PRINT"aangevallen. hij slaat toe en vliegt dan weersnel weg.":RE=RE-1
+5310 RETURN
+5400 REM * DRAAK *
+5410 IF SU%(3,2)>0 THEN GOTO 5440
+5420 IF KA=17 THEN PRINT "een dode draak ligt in de hoek."
+5430 RETURN
+5440 IF KA=18 THEN 5510
+5450 PRINT "een gigantische draakt valt u brullend"
+5460 PRINT "en vuurspuwend aan."
+5470 IF RND(1)<0.5 THEN GOTO 5490
+5480 PRINT"met een snelle sprong kunt u het monsternog net ontwijken.":RETURN
+5490 PRINT"de draak geeft u een geweldige klap met zijn staart.":
+5500 RE=RE-1: RETURN
+5510 PRINT "de draak komt u briesend achterna"
+5520 PRINT"en gooit u met een klap van zijn staart door de lucht."
+5530 KA=16: RE=RE-1: GOSUB 2500
+5540 RETURN
+5600 REM * SMID *
+5610 IF SU% (4,2)>0 OR KA<>SU% (4,1) THEN GOTO 5630
+5620 PRINT "er ligt hier een dode smid.": RETURN
+5630 IF SU% (4,2)=2 THEN SU% (4,3)=30: SU% (4,2)=1
+5640 ON INT (SU% (4,3)/10) GOTO 5700, 5800, 5900, 6000, 6100, 6200
+5700 PRINT "er ligt hier een oude man, die uit"
+5710 PRINT "talrijke wonden bloedt. met beverige"
+5720 PRINT "stem vraagt hij om hulp."
+5730 SU% (4,3)=20: RETURN
+5800 IF KA=SU% (4,1) THEN PRINT "met beverige stem vraagt de smid om hulp.";
+5810 SU% (4,3)=SU% (4,3)+1
+5820 IF SU%(4,3)=25 THEN SU%(4,3)=60
+5830 RETURN
+5900 PRINT "de smid geneest wonderbaarlijk snel."
+5910 PRINT "weldra springt hij op en roept: volg"
+5920 PRINT"mij, ik zal u belonen. hij verdwijnt in oostelijke richting."
+5930 SU% (4,3)=40: SU% (4,1)=11: RETURN
+6000 SU% (4,3)=SU% (4,3)+1
+6010 IF KA<>SU% (4,1) THEN GOTO 6040
+6020 PRINT "de smid is druk bezig een schitterend"
+6030 PRINT "zwaard te smeden."
+6040 IF SU% (4,3)=43 THEN SU% (4,3)=50
+6050 RETURN
+6100 IF KA<>SU%(4,1) THEN GOTO 6130
+6110 PRINT "met een glor
+ieus gebaar legt de smid"
+6120 PRINT"een zwaard aan uw voeten. dan verdwijnt hij in de bossen."
+6130 SU% (4,1)=100: SU% (4,3)=0: OB% (2,1)=11
+6140 RETURN
+6200 IF KA=SU% (4,1) THEN PRINT "met een laatste zucht overlijdt de smid.";
+6210 SU% (4,2)=0: SU% (4,3)=0: RETURN
+8000 REM *************
+8010 REM * INITIATIE *
+8020 REM *************
+8030 NK=28: NC=13: NO=4: NS=4
+8040 NT=NC+NO+NS
+8050 KA=2: RE=6: RL=5
+8060 DIM K%(NK,6), OB% (NO,2), SU%(NS,3), CM%(NC)
+8070 DIM T$(NT)
+8080 FOR I=1 TO NT: READ T$(I):NEXT I
+8090 FOR I=1 TO NC: READ CM%(I):NEXT I
+8100 FOR I=1 TO NO
+8110 READ OB% (I,1), OB%(I,2)
+8120 NEXT I
+8130 FOR I=1 TO NS
+8140 READ SU% (I,1), SU% (I,2), SU% (I,3)
+8150 NEXT I
+8160 FOR I=1 TO NK
+8170 FOR J=1 TO 4
+8180 READ K% (I,J)
+8190 NEXT J
+8200 NEXT I
+8210 K% (16,6)=17: K% (17,5)=16
+8220 PRINT
+8230 RETURN
+9000 REM ********
+9010 REM * DATA *
+9020 REM ********
+9030 DATA NOORD,ZUID,OOST,WEST
+9040 DATA BOVEN,BENEDEN,PAK,LEG
+9050 DATA INVENTARIS,KIJK,DOOD
+9060 DATA GEBRUIK,WACHT
+9070 DATA VERBAND,ZWAARD,FLUIT
+9080 DATA TOUW,TOVENAAR,VOGELS
+9090 DATA DRAAK,SMID
+9100 REM * COMMANDO'S *
+9110 DATA  1, 1, 1, 1
+9120 DATA  1, 1, 2, 3
+9130 DATA  4, 5, 6, 7, 8
+9140 REM * VOORWERPEN: PLAATS, GEWICHT*
+9150 DATA  5, 1, 99, 3, 99, 1, 11, 3
+9160 REM * PERSONEN *
+9170 DATA  19, 1, 0, 0, 5, 0
+9180 DATA  17, 5, 0,10, 1,10
+9190 REM * KAMER VERBINDING
+9200 DATA  1, 4, 2, 1
+9210 DATA  3, 5, 3, 1
+9220 DATA  2, 6,20, 2
+9230 DATA  1, 7, 5, 4
+9240 DATA  2, 8, 6, 4
+9250 DATA  3, 9, 6, 5
+9260 DATA  4,10, 8, 4
+9270 DATA  5, 8, 9, 7
+9280 DATA  6,12,14, 8
+9290 DATA  7, 0,11, 0
+9300 DATA  0, 0, 0,10
+9310 DATA  9, 0,13, 0
+9320 DATA 14, 0, 0,12
+9330 DATA  0,13, 0, 9
+9340 DATA  0, 0,16, 0
+9350 DATA  0, 0, 0,15
+9360 DATA  0, 0, 0,18
+9370 DATA  0,19,17, 0
+9380 DATA 18, 0, 0, 0
+9390 DATA  0, 0,21, 3
+9400 DATA 22,26,24,20
+9410 DATA  0,21,23, 0
+9420 DATA  0,28, 0,22
+9430 DATA  0, 0, 0,21
+9440 DATA  0, 0, 0,28
+9450 DATA 21, 0,27, 0
+9460 DATA 28, 0, 0,26
+9470 DATA 23,27,25, 0
